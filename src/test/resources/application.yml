@@ -1,0 +1,21 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  data:
+    redis:
+      repositories:
+        enabled: false
+
+testsite:
+  jwt:
+    secret: test-secret-key-with-at-least-32-bytes-length-for-hmac-sha256-ok
+    access-token-validity-ms: 1800000
+    refresh-token-validity-ms: 1209600000
+  storage:
+    upload-dir: ./build/test-uploads
+    public-base-url: http://localhost:8080/files
+
+logging:
+  level:
+    org.hibernate.SQL: INFO

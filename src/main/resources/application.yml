@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: testsite
+  profiles:
+    active: local
+  datasource:
+    url: jdbc:postgresql://localhost:5433/testsite
+    username: testsite
+    password: testsite
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+    open-in-view: false
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 50MB
+
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+logging:
+  level:
+    root: INFO
+    com.testsite: DEBUG
+    org.hibernate.SQL: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{traceId:-},%X{userId:-}] [%thread] %logger{36} - %msg%n"
+
+testsite:
+  jwt:
+    secret: ${JWT_SECRET:change-me-in-prod-this-must-be-at-least-32-bytes-long-secret-key}
+    access-token-validity-ms: 1800000      # 30 minutes
+    refresh-token-validity-ms: 1209600000  # 14 days
+  storage:
+    upload-dir: ${UPLOAD_DIR:./uploads}
+    public-base-url: http://localhost:8080/files
