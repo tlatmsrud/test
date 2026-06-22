@@ -14,6 +14,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @Slf4j
 @RestControllerAdvice
@@ -57,6 +58,15 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleMessageNotReadable(HttpMessageNotReadableException e, HttpServletRequest request) {
         log.warn("MalformedRequestBody at {} {} -> {}", request.getMethod(), request.getRequestURI(), e.getMostSpecificCause().getMessage());
         return ResponseEntity.badRequest().body(ErrorResponse.of(ErrorCode.MALFORMED_REQUEST, e.getMostSpecificCause().getMessage()));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException e, HttpServletRequest request) {
+        String requiredType = e.getRequiredType() != null ? e.getRequiredType().getSimpleName() : "unknown";
+        String message = "파라미터 '%s'의 값 '%s'을(를) %s 타입으로 변환할 수 없습니다.".formatted(e.getName(), e.getValue(), requiredType);
+        log.warn("TypeMismatch at {} {} -> {}", request.getMethod(), request.getRequestURI(), message);
+        List<ErrorResponse.FieldError> fieldErrors = List.of(new ErrorResponse.FieldError(e.getName(), message, e.getValue()));
+        return ResponseEntity.badRequest().body(ErrorResponse.of(ErrorCode.INVALID_INPUT, fieldErrors));
     }
 
     @ExceptionHandler(AuthenticationException.class)
