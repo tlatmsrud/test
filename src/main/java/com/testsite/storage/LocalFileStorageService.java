@@ -46,7 +46,7 @@ public class LocalFileStorageService implements FileStorageService {
     @Override
     public StoredFile store(MultipartFile file, String subdirectory) {
         if (file == null || file.isEmpty()) {
-            throw new BusinessException(ErrorCode.FILE_UPLOAD_FAILED, "빈 파일입니다.");
+            throw new BusinessException(ErrorCode.EMPTY_FILE);
         }
         String contentType = file.getContentType();
         if (contentType == null || !ALLOWED_TYPES.contains(contentType.toLowerCase())) {
