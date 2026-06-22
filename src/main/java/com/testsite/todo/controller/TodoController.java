@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -94,7 +95,7 @@ public class TodoController {
             @LoginUser LoginUserDto loginUser,
             @PathVariable @Positive Long todoId,
             @RequestPart("files") List<MultipartFile> files) {
-        return ResponseEntity.ok(todoService.uploadImages(loginUser.id(), todoId, files));
+        return ResponseEntity.status(HttpStatus.CREATED).body(todoService.uploadImages(loginUser.id(), todoId, files));
     }
 
     @DeleteMapping("/{todoId}/images/{imageId}")
