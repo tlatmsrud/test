@@ -1,6 +1,7 @@
 package com.testsite.common.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -66,6 +67,19 @@ public class GlobalExceptionHandler {
         String message = "파라미터 '%s'의 값 '%s'을(를) %s 타입으로 변환할 수 없습니다.".formatted(e.getName(), e.getValue(), requiredType);
         log.warn("TypeMismatch at {} {} -> {}", request.getMethod(), request.getRequestURI(), message);
         List<ErrorResponse.FieldError> fieldErrors = List.of(new ErrorResponse.FieldError(e.getName(), message, e.getValue()));
+        return ResponseEntity.badRequest().body(ErrorResponse.of(ErrorCode.INVALID_INPUT, fieldErrors));
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolation(ConstraintViolationException e, HttpServletRequest request) {
+        List<ErrorResponse.FieldError> fieldErrors = e.getConstraintViolations().stream()
+                .map(v -> {
+                    String path = v.getPropertyPath().toString();
+                    String field = path.contains(".") ? path.substring(path.lastIndexOf('.') + 1) : path;
+                    return new ErrorResponse.FieldError(field, v.getMessage(), v.getInvalidValue());
+                })
+                .toList();
+        log.warn("ConstraintViolation at {} {} -> {}", request.getMethod(), request.getRequestURI(), fieldErrors);
         return ResponseEntity.badRequest().body(ErrorResponse.of(ErrorCode.INVALID_INPUT, fieldErrors));
     }
 

@@ -7,10 +7,12 @@ import com.testsite.project.dto.request.ProjectUpdateRequest;
 import com.testsite.project.dto.response.ProjectResponse;
 import com.testsite.project.service.ProjectService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import java.net.URI;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/projects")
 @RequiredArgsConstructor
+@Validated
 public class ProjectController {
 
     private final ProjectService projectService;
@@ -43,14 +46,14 @@ public class ProjectController {
     @GetMapping("/{projectId}")
     public ResponseEntity<ProjectResponse> get(
             @LoginUser LoginUserDto loginUser,
-            @PathVariable Long projectId) {
+            @PathVariable @Positive Long projectId) {
         return ResponseEntity.ok(projectService.getById(loginUser.id(), projectId));
     }
 
     @PatchMapping("/{projectId}")
     public ResponseEntity<ProjectResponse> update(
             @LoginUser LoginUserDto loginUser,
-            @PathVariable Long projectId,
+            @PathVariable @Positive Long projectId,
             @Valid @RequestBody ProjectUpdateRequest request) {
         return ResponseEntity.ok(projectService.update(loginUser.id(), projectId, request));
     }
@@ -58,7 +61,7 @@ public class ProjectController {
     @DeleteMapping("/{projectId}")
     public ResponseEntity<Void> delete(
             @LoginUser LoginUserDto loginUser,
-            @PathVariable Long projectId) {
+            @PathVariable @Positive Long projectId) {
         projectService.delete(loginUser.id(), projectId);
         return ResponseEntity.noContent().build();
     }
