@@ -8,6 +8,7 @@ import com.testsite.project.dto.request.ProjectCreateRequest;
 import com.testsite.project.dto.request.ProjectUpdateRequest;
 import com.testsite.project.dto.response.ProjectResponse;
 import com.testsite.project.repository.ProjectRepository;
+import com.testsite.todo.repository.TodoRepository;
 import com.testsite.user.domain.User;
 import com.testsite.user.service.UserService;
 import java.util.List;
@@ -23,6 +24,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
     private final UserService userService;
+    private final TodoRepository todoRepository;
 
     @Override
     @Transactional
@@ -44,6 +46,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional
     public void delete(Long ownerId, Long projectId) {
         Project project = getOwnedEntity(ownerId, projectId);
+        todoRepository.deleteAll(todoRepository.findAllByProjectId(projectId));
         projectRepository.delete(project);
     }
 
