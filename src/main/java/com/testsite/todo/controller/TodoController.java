@@ -51,7 +51,7 @@ public class TodoController {
     @GetMapping
     public ResponseEntity<List<TodoSummaryResponse>> search(
             @LoginUser LoginUserDto loginUser,
-            @RequestParam(required = false) Long projectId,
+            @RequestParam(required = false) @Positive Long projectId,
             @RequestParam(required = false) TodoStatus status,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
