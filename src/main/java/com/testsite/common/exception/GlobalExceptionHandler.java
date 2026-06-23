@@ -13,9 +13,11 @@ import org.springframework.validation.BindException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 @Slf4j
 @RestControllerAdvice
@@ -67,6 +69,22 @@ public class GlobalExceptionHandler {
         String message = "파라미터 '%s'의 값 '%s'을(를) %s 타입으로 변환할 수 없습니다.".formatted(e.getName(), e.getValue(), requiredType);
         log.warn("TypeMismatch at {} {} -> {}", request.getMethod(), request.getRequestURI(), message);
         List<ErrorResponse.FieldError> fieldErrors = List.of(new ErrorResponse.FieldError(e.getName(), message, e.getValue()));
+        return ResponseEntity.badRequest().body(ErrorResponse.of(ErrorCode.INVALID_INPUT, fieldErrors));
+    }
+
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public ResponseEntity<ErrorResponse> handleMissingPart(MissingServletRequestPartException e, HttpServletRequest request) {
+        log.warn("MissingRequestPart at {} {} -> part={}", request.getMethod(), request.getRequestURI(), e.getRequestPartName());
+        String message = "필수 요청 파트 '%s'가 누락되었습니다.".formatted(e.getRequestPartName());
+        List<ErrorResponse.FieldError> fieldErrors = List.of(new ErrorResponse.FieldError(e.getRequestPartName(), message, null));
+        return ResponseEntity.badRequest().body(ErrorResponse.of(ErrorCode.INVALID_INPUT, fieldErrors));
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ErrorResponse> handleMissingParameter(MissingServletRequestParameterException e, HttpServletRequest request) {
+        log.warn("MissingRequestParameter at {} {} -> param={}", request.getMethod(), request.getRequestURI(), e.getParameterName());
+        String message = "필수 요청 파라미터 '%s'가 누락되었습니다.".formatted(e.getParameterName());
+        List<ErrorResponse.FieldError> fieldErrors = List.of(new ErrorResponse.FieldError(e.getParameterName(), message, null));
         return ResponseEntity.badRequest().body(ErrorResponse.of(ErrorCode.INVALID_INPUT, fieldErrors));
     }
 
